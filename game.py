@@ -1,5 +1,6 @@
 import pygame
 import random
+from helperClass import getDangers, getFruitPosition, getDirection
 
 
 SCREEN_SIZE = 640
@@ -7,15 +8,18 @@ WHITE = (128,128,128)
 RED = (255,0,0)
 BLACK = (0,0,0)
 CELLSIZE = 20
+ticks = 5
+tick_modifier = 1
 bodyPositions = []
 # initially moves to the right
 lastPressedKey = 'd'
 moveDir = 'right'
 fruitPos = None
+pause = False
 
 
 def main():
-    global screen, lastPressedKey
+    global screen, lastPressedKey, ticks, tick_modifier, pause
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_SIZE,SCREEN_SIZE))
     clock = pygame.time.Clock()
@@ -35,10 +39,21 @@ def main():
                         moveDir == 'left' and pressed != 'd' or 
                         moveDir == 'right' and pressed != 'a'):
                         lastPressedKey = pressed
+                # speeds up game
+                elif event.key == pygame.K_UP:
+                    tick_modifier += 0.2
+                # slows down game
+                elif event.key == pygame.K_DOWN:
+                    if ticks * (tick_modifier - 0.2) > 1:
+                        tick_modifier -= 0.2
+                # pauses game
+                elif event.key == pygame.K_SPACE:
+                    pause = not pause
+                    
 
 
         #drawGrid()
-        if(len(bodyPositions) > 0):
+        if(len(bodyPositions) > 0 and not pause):
             move(lastPressedKey)
             if fruitCollision():
                 pass
@@ -50,9 +65,14 @@ def main():
         screen.fill(BLACK)
         drawSnake()
         drawFruit()
+        if(len(bodyPositions) > 0 ):
+            #print(getDangers(bodyPositions, moveDir, CELLSIZE, SCREEN_SIZE))
+            #print(getFruitPosition((bodyPositions[0].x,bodyPositions[0].y), (fruitPos.x,fruitPos.y)))
+            print(getDirection(moveDir))
 
         pygame.display.update()
-        clock.tick(3)
+        clock.tick(ticks * tick_modifier)
+
 
 
     pygame.quit()
@@ -134,7 +154,7 @@ def drawFruit():
 def wallCollision():
     # check if snake runs into wall
     head = bodyPositions[0]
-    if head.x + CELLSIZE > SCREEN_SIZE or head.x < 0 or head.y + CELLSIZE> SCREEN_SIZE  or head.y < 0:
+    if head.x + CELLSIZE > SCREEN_SIZE or head.x < 0 or head.y + CELLSIZE > SCREEN_SIZE  or head.y < 0:
         death()
         return True
     return False
