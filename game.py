@@ -133,13 +133,24 @@ class SnakeAI:
     def spawn_fruit(self) -> Vector2:
         # random numbers between 0 - 31 and then multiplying by CELLSIZE to assign fruit to a cell
         # -2 comes from design choice, since the snake shouldn't be a solid moving mass, but visually separable and
-        # therefore the fruit should have the same size   
-        xPos = random.randint(0,31)
-        yPos = random.randint(0,31)
-        xPos *= CELLSIZE 
-        yPos *= CELLSIZE
+        # therefore the fruit should have the same size
+        #while True:
+            while True:
+                xPos = random.randint(0,31)
+                yPos = random.randint(0,31)
+                xPos *= CELLSIZE 
+                yPos *= CELLSIZE
+                valid = False
+                for el in self.snake_segments:
+                    if el.x == xPos and el.y == yPos:
+                        valid = False
+                        continue
+                    else:
+                        valid = True
+                if valid:
+                    break
 
-        return Vector2(xPos,yPos)
+            return Vector2(xPos,yPos)
 
     # check if snake runs into wall
     def is_wall_collision(self):
