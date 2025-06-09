@@ -11,10 +11,10 @@ def get_dangers(
     head = snake_segments[0]
     dangers = []
 
-    head_next_up = pygame.Rect(head)
-    head_next_down = pygame.Rect(head)
-    head_next_left = pygame.Rect(head)
-    head_next_right = pygame.Rect(head)
+    head_next_up = pygame.Rect(head.x,head.y, CELLSIZE, CELLSIZE)
+    head_next_down = pygame.Rect(head.x,head.y, CELLSIZE, CELLSIZE)
+    head_next_left = pygame.Rect(head.x,head.y, CELLSIZE, CELLSIZE)
+    head_next_right = pygame.Rect(head.x,head.y, CELLSIZE, CELLSIZE)
     head_next_up.y -= CELLSIZE
     head_next_down.y += CELLSIZE
     head_next_left.x -= CELLSIZE
@@ -25,6 +25,7 @@ def get_dangers(
     west_tail = False
 
     for tail in snake_segments[1:]:
+        tail = pygame.Rect(tail.x,tail.y, CELLSIZE, CELLSIZE)
         if head_next_up.colliderect(tail):
             north_tail = True
         elif head_next_right.colliderect(tail):
@@ -41,21 +42,21 @@ def get_dangers(
 
     # order: straight, left, right
     if direction == 'up':
-        dangers.append(1 if north_wall or north_tail else 0)
-        dangers.append(1 if west_wall or west_tail else 0)
-        dangers.append(1 if east_wall or east_tail else 0)
+        dangers.append(north_wall or north_tail)
+        dangers.append(west_wall or west_tail)
+        dangers.append(east_wall or east_tail)
     elif direction == 'down':
-        dangers.append(1 if south_wall or south_tail else 0)
-        dangers.append(1 if east_wall or east_tail else 0)
-        dangers.append(1 if west_wall or west_tail else 0)
+        dangers.append(south_wall or south_tail)
+        dangers.append(east_wall or east_tail)
+        dangers.append(west_wall or west_tail)
     elif direction == 'left':
-        dangers.append(1 if west_wall or west_tail else 0)
-        dangers.append(1 if south_wall or south_tail else 0)
-        dangers.append(1 if north_wall or north_tail else 0)
+        dangers.append(west_wall or west_tail)
+        dangers.append(south_wall or south_tail)
+        dangers.append(north_wall or north_tail)
     else:
-        dangers.append(1 if east_wall or east_tail else 0)
-        dangers.append(1 if north_wall or north_tail else 0)
-        dangers.append(1 if south_wall or south_tail else 0)
+        dangers.append(east_wall or east_tail)
+        dangers.append(north_wall or north_tail)
+        dangers.append(south_wall or south_tail)
     
 
     return dangers
@@ -63,28 +64,25 @@ def get_dangers(
 
 # returns a 4-element binary list giving info on the fruit's position, e.g. up right
 def get_fruit_position(head_pos: tuple[int,int], fruit_pos: tuple[int,int]):
-    head_x, head_y = head_pos
-    fruit_x, fruit_y = fruit_pos
+    # order: up, right, down, left
+    return [
+        head_pos.y - fruit_pos.y > 0,
+        head_pos.x - fruit_pos.x < 0,
+        head_pos.y - fruit_pos.y < 0,
+        head_pos.x - fruit_pos.x > 0
+    ]
 
-    # order: up, left, right, down
-    fruit_direction = []
-    fruit_direction.append(1 if head_y - fruit_y > 0 else 0)
-    fruit_direction.append(1 if head_x - fruit_x > 0 else 0)
-    fruit_direction.append(1 if head_x - fruit_x < 0 else 0)
-    fruit_direction.append(1 if head_y - fruit_y < 0 else 0)
-
-    return fruit_direction
 
 
 # returns 4-element binary list with direction of snake
 def get_direction(direction: str):
-    # order: up, left, right, dwon
+    # order: up, right, down, left
     return [
-        1 if direction == 'up' else 0,
-        1 if direction == 'left' else 0,
-        1 if direction == 'right' else 0,
-        1 if direction == 'down' else 0
-        ]
+        direction == 'up',
+        direction == 'right',
+        direction == 'down',
+        direction == 'left'
+    ]
 
     
 

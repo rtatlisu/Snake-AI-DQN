@@ -10,6 +10,9 @@ WHITE = (128,128,128)
 RED = (255,0,0)
 BLACK = (0,0,0)
 CELLSIZE = 20
+WIN_REWARD = 1
+NO_REWARD = 0
+LOSE_REWARD = -1
 
 # used to easily store positions of snake segments and fruit
 class Vector2:
@@ -31,13 +34,14 @@ class SnakeAI:
         self.head = Vector2(CELLSIZE*4,SCREEN_SIZE//2)
         self.tail = Vector2(CELLSIZE*3, SCREEN_SIZE//2)
         self.snake_segments = [self.head, self.tail]
+        self.moves_left = self.set_lifespan()
 
         self.fruit = self.spawn_fruit()
 
         self.screen = pygame.display.set_mode((SCREEN_SIZE,SCREEN_SIZE))
         self.clock = pygame.time.Clock()
     
-    def gameLoop(self):
+    def gameLoop(self, direction):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -58,25 +62,40 @@ class SnakeAI:
                     if self.ticks * (self.tick_modifier - 0.2) > 1:
                         self.tick_modifier -= 0.2
 
-
-        self.move(self.lastPressedKey)
+        #print(direction)
+        self.move(direction)
         # moving the snake consists of adding a 'cube' in front of the head and removing the tail
         self.snake_segments.insert(0, self.head)
 
         # if death by either, reset game and exit current loop iteration
         if self.is_tail_collision() or self.is_wall_collision():
             self.death()
-            return
+            return LOSE_REWARD, True, self.score
         # if fruit eaten, dont remove last tail part 
+        fruit_eaten = False
         if self.is_fruit_eaten():
             self.fruit = self.spawn_fruit()
+            self.moves_left = self.set_lifespan()
+            fruit_eaten = True
         else:
             self.snake_segments.pop()
 
         
         self.update_ui()
+        self.moves_left -= 1
         # tick_modifier used to increase game speed while in-game
         self.clock.tick(self.ticks * self.tick_modifier)
+
+        if fruit_eaten:
+            return WIN_REWARD, False, self.score
+        if self.moves_left == 0:
+            self.death()
+            return LOSE_REWARD, True, self.score
+        
+        return NO_REWARD, False, self.score
+        
+
+
 
 
 
@@ -94,8 +113,12 @@ class SnakeAI:
         pygame.draw.rect(self.screen, RED, rect, 10)
 
         # other
+        # score
         text_surface = font.render(f'Score: {self.score}', True, (255, 255, 255))
         self.screen.blit(text_surface, (10, 10))
+        # moves left
+        text_surface = font.render(f'Moves left: {self.moves_left}', True, (255, 255, 255))
+        self.screen.blit(text_surface, (10, 40))
 
         pygame.display.update()
 
@@ -109,21 +132,22 @@ class SnakeAI:
 
 
     def move(self, direction):
+        # direction input comes as 3-element binary array with order straight, left, right
         xPos = self.head.x
         yPos = self.head.y
+        directions = ['up','right','down','left']
+        # for left, multiply 1 by -1 to shift index to the left, else to the right
+        # since its always either left or right, we can combine this in one call
+        self.moveDir = directions[(directions.index(self.moveDir) + (direction[1] * -1) + direction[2]) % 4]
 
-        if direction == 'w':
+        if self.moveDir == 'up':
             yPos -= CELLSIZE
-            self.moveDir = 'up'
-        elif direction == 'a':
+        elif self.moveDir == 'left':
             xPos -= CELLSIZE
-            self.moveDir = 'left'
-        elif direction == 's':
+        elif self.moveDir == 'down':
             yPos += CELLSIZE
-            self.moveDir = 'down'
-        elif direction == 'd':
+        elif self.moveDir == 'right':
             xPos += CELLSIZE
-            self.moveDir = 'right'
         
         # create new instance for self.head to insert at the top of list and after pop the last element in list
         self.head = Vector2(xPos,yPos)
@@ -174,6 +198,9 @@ class SnakeAI:
                 return True
         return False
 
+    def set_lifespan(self):
+        return 20 + (10 * len(self.snake_segments))
+
 
 
     # resets runtime variables to initial state for restart
@@ -187,6 +214,7 @@ class SnakeAI:
         self.head = Vector2(CELLSIZE*4,SCREEN_SIZE//2)
         self.tail = Vector2(CELLSIZE*3, SCREEN_SIZE//2)
         self.snake_segments = [self.head, self.tail]
+        self.moves_left = self.set_lifespan()
 
         self.fruit = self.spawn_fruit()
 
@@ -195,8 +223,8 @@ class SnakeAI:
         
 
 
-if __name__ == '__main__':
-    instance = SnakeAI(640,640,5)
+# if __name__ == '__main__':
+#     instance = SnakeAI(640,640,5)
 
-    while True:
-        instance.gameLoop()
+#     while True:
+#         instance.gameLoop()
