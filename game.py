@@ -21,7 +21,10 @@ class Vector2:
         self.y = y
 
 class SnakeAI:
-    def __init__(self, width, height, ticks):
+    rounds_played = 0
+    max_score = 0
+    def __init__(self, width, height, ticks, agent):
+        self.agent = agent
         self.width = width
         self.height = height
         self.ticks = ticks
@@ -44,6 +47,8 @@ class SnakeAI:
     def gameLoop(self, direction):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                if self.agent.trainer.ENABLE_SAVING:
+                    self.agent.trainer.save_models()
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d]:
@@ -69,8 +74,9 @@ class SnakeAI:
 
         # if death by either, reset game and exit current loop iteration
         if self.is_tail_collision() or self.is_wall_collision():
+            score = self.score
             self.death()
-            return LOSE_REWARD, True, self.score
+            return LOSE_REWARD, True, score
         # if fruit eaten, dont remove last tail part 
         fruit_eaten = False
         if self.is_fruit_eaten():
@@ -89,8 +95,9 @@ class SnakeAI:
         if fruit_eaten:
             return WIN_REWARD, False, self.score
         if self.moves_left == 0:
+            score = self.score
             self.death()
-            return LOSE_REWARD, True, self.score
+            return LOSE_REWARD, True, score
         
         return NO_REWARD, False, self.score
         
@@ -164,13 +171,11 @@ class SnakeAI:
                 yPos = random.randint(0,31)
                 xPos *= CELLSIZE 
                 yPos *= CELLSIZE
-                valid = False
+                valid = True
                 for el in self.snake_segments:
                     if el.x == xPos and el.y == yPos:
                         valid = False
-                        continue
-                    else:
-                        valid = True
+                        break
                 if valid:
                     break
 
@@ -199,12 +204,15 @@ class SnakeAI:
         return False
 
     def set_lifespan(self):
-        return 20 + (10 * len(self.snake_segments))
+        return min(100 + 2 * len(self.snake_segments), 200)
 
 
 
     # resets runtime variables to initial state for restart
     def death(self):
+        SnakeAI.rounds_played += 1
+        if self.score > SnakeAI.max_score:
+            SnakeAI.max_score = self.score
         self.snake_segments = []
         self.fruit = None
         self.lastPressedKey = 'd'
