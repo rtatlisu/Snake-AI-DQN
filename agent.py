@@ -7,7 +7,7 @@ import random
 import torch
 import matplotlib.pyplot as plt
 
-EPSILON_MIN = 0.05
+EPSILON_MIN = 0.005
 BATCH_SIZE = 1000
 TARGET_NETWORK_UPDATE_RATE = 100
 
@@ -44,7 +44,7 @@ class Agent:
         self.memory.append((state,action,reward,state_next,done))
 
     def get_action(self, state):
-        self.epsilon = max(EPSILON_MIN, self.epsilon - 1/10000)
+        self.epsilon = max(EPSILON_MIN, self.epsilon * 0.03)
         direction = [0,0,0]
  
         # explore
@@ -87,7 +87,7 @@ class Agent:
 
 if __name__ == '__main__':
     agent = Agent()
-    game = SnakeAI(640,640,2000, agent)
+    game = SnakeAI(640,640,200, agent)
     counter = 0
     while True:
         state = agent.get_state(game)
