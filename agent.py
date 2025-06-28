@@ -36,7 +36,7 @@ class Agent:
             # get fruit direction
             *get_fruit_position(game.head,game.fruit)
         ]
-        #print(np.array(state,dtype=float))
+
         return np.array(state,dtype=float)
 
     def add_memory(self, state, action, reward, state_next, done):
@@ -44,7 +44,6 @@ class Agent:
         self.memory.append((state,action,reward,state_next,done))
 
     def get_action(self, state):
-        print(self.epsilon)
         self.epsilon = max(EPSILON_MIN, self.epsilon - 1/10000)
         direction = [0,0,0]
  
@@ -57,7 +56,7 @@ class Agent:
             prediction = self.model(state)
             action = torch.argmax(prediction).item()
             direction[action] = 1
-            #print(prediction, direction)
+
         return direction
     
     def train_long_memory(self, state, action, reward, state_next, done):

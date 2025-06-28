@@ -87,11 +87,5 @@ class DQN_Trainer:
         self.target_model.load_state_dict(load['target'])
         self.optimizer.load_state_dict(load['optimizer'])
 
-        # next steps:
-        # reduce moves_left, gets too big for big snakes
-        # implement target network and let target network provide Qmax(s',a')
-        # see about adding 1 - done to target q-value calculation
-        # implement save functionality to store weights and also see about loading these
-        # create different live-plots, such as games played in relation to score and
-            # also try adding stuff like epsilon to maybe find reason for plateus
+        
         

@@ -67,7 +67,6 @@ class SnakeAI:
                     if self.ticks * (self.tick_modifier - 0.2) > 1:
                         self.tick_modifier -= 0.2
 
-        #print(direction)
         self.move(direction)
         # moving the snake consists of adding a 'cube' in front of the head and removing the tail
         self.snake_segments.insert(0, self.head)
@@ -163,9 +162,6 @@ class SnakeAI:
     # spawns the fruit and makes sure that it's not spawning on top of the snake
     def spawn_fruit(self) -> Vector2:
         # random numbers between 0 - 31 and then multiplying by CELLSIZE to assign fruit to a cell
-        # -2 comes from design choice, since the snake shouldn't be a solid moving mass, but visually separable and
-        # therefore the fruit should have the same size
-        #while True:
             while True:
                 xPos = random.randint(0,31)
                 yPos = random.randint(0,31)
@@ -225,14 +221,3 @@ class SnakeAI:
         self.moves_left = self.set_lifespan()
 
         self.fruit = self.spawn_fruit()
-
-
-
-        
-
-
-# if __name__ == '__main__':
-#     instance = SnakeAI(640,640,5)
-
-#     while True:
-#         instance.gameLoop()
