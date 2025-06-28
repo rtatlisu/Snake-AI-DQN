@@ -33,6 +33,6 @@ I'm quite happy with the result, as I learned a lot about DQN and Torch.
 The issue with the approach I chose is that the snake can never learn to avoid running into a dead end that is created by its own body.
 For that reason I didn't even start fiddling around with other hyperparameters apart from epsilon since it wouldn't solve my problem.
 With the settings described above, the snake reaches an average score of just under 30, which isn't too bad.
-A more optimal approach would be to give the snake info on the entire playing field and/or to include pathfinding algorithms like A*, but since my goals was primarily to learn about DQN and some libraries, I left it at that state.
+A more optimal approach would be to give the snake info on the entire playing field and/or to include pathfinding algorithms like A*, but since my goals was primarily to learn about DQN, Python and some libraries, I left it at that state.
 
 
